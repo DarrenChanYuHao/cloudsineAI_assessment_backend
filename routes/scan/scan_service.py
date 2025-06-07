@@ -1,97 +1,151 @@
 import os
 from dotenv import load_dotenv
-from fastapi import UploadFile, File
+from fastapi import UploadFile, File, HTTPException
 import requests
 import magic
 
+from routes.scan.DTO.ScannedAnalysisDTO import ScannedAnalysisDTO, HashedFileName
+from routes.scan.DTO.ScannedFileDTO import ScannedFileDTO
+
 # Load environment variables from .env file
 load_dotenv()
-api_key = os.getenv("VIRUSTOTAL_API_KEY")
+virustotal_api_key = os.getenv("VIRUSTOTAL_API_KEY")
+
+# Constants
+MAX_FILE_SIZE_MB = 32
+MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024  # 32 MB chosen because it is the free tier limit for VirusTotal API
+MAX_FILE_NAME_LENGTH = 255
+ALLOWED_FILE_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "application/pdf",
+    "text/plain",
+    "application/zip",
+    "application/x-rar-compressed",
+    "application/javascript",
+}
+VT_API_BASE_URL = "https://www.virustotal.com/api/v3"
 
 '''
  This is the service layer for the scan controller.
  It contains the business logic for virus and malware scanning and uploading files.
 '''
 
-def scan_file(file: UploadFile = File(...)):
+def validate_file(file: UploadFile):
     """
-    Scan a file for viruses and malware.
-
-    1. Check if the file is a valid file type.
-    2. Check if the file is under 32MB.
-    3. Scan the file for viruses and malware using VirusTotalAPI.
-    4. If the file is clean, return the filename.
+    Validate the uploaded file.
+    :param file: UploadFile: The file to validate.
+    :return: None
     """
 
-    MAX_FILE_SIZE_MB = 32 * 1024 * 1024 # 32 MB chosen because it is the free tier limit for VirusTotal API
-    MAX_FILE_NAME_LENGTH = 255
-    ALLOWED_FILE_TYPES = {
-        "image/jpeg",
-        "image/png",
-        "application/pdf",
-        "text/plain",
-        "application/zip",
-        "application/x-rar-compressed",
-        "application/javascript",
-    }
-    VT_FILEUPLOAD_URL = "https://www.virustotal.com/api/v3/files"
-
-
-    # First, I santitise the file name and limit number of characters
     if len(file.filename) > MAX_FILE_NAME_LENGTH:
-        return {"error": "Filename exceeds maximum length of 255 characters."}
+        raise HTTPException(status_code=400,
+                            detail=f"File name is too long. Maximum length is {MAX_FILE_NAME_LENGTH} characters.")
 
     # Check if the file size exceeds max allowed size
-    if file.size > MAX_FILE_SIZE_MB:
-        return {"error": f"File size exceeds {MAX_FILE_SIZE_MB}MB limit."}
+    if file.size > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail=f"File size is too big. Maximum size is {MAX_FILE_SIZE_MB} MB.")
 
     # Check if the file type is valid using both file.content_type and python-magic
     if file.content_type not in ALLOWED_FILE_TYPES:
-        return {"error" : f"Invalid File Type. Allowed types are: {', '.join(ALLOWED_FILE_TYPES)}."}
+        raise HTTPException(status_code=400,
+                            detail=f"File content type is {file.content_type}. Allowed types are: " + ", ".join(
+                                ALLOWED_FILE_TYPES))
 
     # Use python-magic to verify the file type
     detected_file_type = magic.from_buffer(file.file.read(1024), mime=True)
     file.file.seek(0)
 
     if detected_file_type not in ALLOWED_FILE_TYPES:
-        return {"error" : f"Invalid File Type. Allowed types are: {', '.join(ALLOWED_FILE_TYPES)}."}
+        raise HTTPException(status_code=400,
+                            detail=f"File content type is {file.content_type}. Allowed types are: " + ", ".join(
+                                ALLOWED_FILE_TYPES))
 
-    # Check malware and virus using VirusTotalAPI
+def upload_to_virustotal(file: UploadFile) -> ScannedFileDTO:
+    """
+    Upload file to VirusTotal for scanning.
+    :param file: UploadFile: The file to upload.
+    :return: ScannedFileDTO: The scanned file details DTO.
+    """
+    VT_FILE_UPLOAD_URL = f"{VT_API_BASE_URL}/files"
+
     files = {
         "file": (file.filename, file.file, file.content_type)
     }
     headers = {
         "accept": "application/json",
-        "x-Apikey": api_key
+        "x-apikey": virustotal_api_key
     }
 
-    response = requests.post(url=VT_FILEUPLOAD_URL, headers=headers, files=files)
+    response = requests.post(url=VT_FILE_UPLOAD_URL, headers=headers, files=files)
 
     if response.status_code != 200:
-        return {"error": "Failed to scan file with VirusTotal. Please try again later."}
+        raise HTTPException(status_code=response.status_code,
+                            detail="Failed to scan file with VirusTotal. Please try again later.")
 
-    # if response.status_code == 200:
-    #
-    #     # Get analysis results
-    #     analysis_results = response.json()
+    response_data = response.json()
 
-    return response.json()
+    scanned_file = ScannedFileDTO(
+        file_name=file.filename,
+        file_size=file.size,
+        file_type=file.content_type,
+        virus_total_id=response_data['data']['id']
+    )
 
-def analyze_file(file_id: str):
+    return scanned_file
+
+def scan_file(file: UploadFile = File(...)) -> ScannedFileDTO:
     """
-    Analyze a file for viruses and malware.
+    Scan a file for viruses and malware.
+    :param: file: UploadFile: The file to scan.
+    :return: ScannedFileDTO: The scanned file details DTO.
+    """
+    try:
 
-    1. Check if the file is a valid file type.
-    2. Check if the file is under 32MB.
-    3. Analyze the file using VirusTotalAPI.
-    4. If the file is clean, return the filename.
+        # Check the file name, type and limit number of characters
+        validate_file(file)
+
+        # Check malware and virus using VirusTotalAPI
+        scanned_file = upload_to_virustotal(file)
+
+        return scanned_file
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while scanning the file. Please try again later.")
+
+def analyze_file(file_id: str) -> ScannedAnalysisDTO:
+    """
+    Return analysis of a file for viruses and malware.
+    :param file_id: str: The VirusTotal ID of the scanned file.
+    :return: ScannedAnalysisDTO: The scanned analysis details DTO.
     """
 
-    VT_ANALYSIS_URL = f"https://www.virustotal.com/api/v3/analyses/{file_id}"
+    VT_ANALYSIS_URL = f"{VT_API_BASE_URL}/analyses/{file_id}"
     headers = {
         "accept": "application/json",
-        "x-apikey": api_key
+        "x-apikey": virustotal_api_key
     }
 
     response = requests.get(url=VT_ANALYSIS_URL, headers=headers)
-    return response.json()
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code,
+                            detail="Failed to retrieve file analysis from VirusTotal. Please try again later.")
+
+    scanned_analysis = ScannedAnalysisDTO(
+        virus_total_id=file_id,
+        scan_status=response.json()['data']['attributes']['status'],
+        results=response.json()['data']['attributes']['results'],
+        stats=response.json()['data']['attributes']['stats'],
+        scan_date=response.json()['data']['attributes']['date'],
+        metadata= HashedFileName(
+            sha256=response.json()['meta']['file_info']['sha256'],
+            md5=response.json()['meta']['file_info']['md5'],
+            sha1=response.json()['meta']['file_info']['sha1']
+        )
+    )
+
+    return scanned_analysis
