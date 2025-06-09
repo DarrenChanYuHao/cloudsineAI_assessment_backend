@@ -32,4 +32,9 @@ jobs:
 
             echo "Running Docker container..."
             sudo docker run -d -p 8000:8000 --name cloudsine_backend cloudsine_backend
+          
+            echo "Confgure Nginx..."
+            sudo cp /home/ubuntu/cloudsineAI_assessment_backend/nginx/fastapi.conf /etc/nginx/sites-available/cloudsine_backend
+            sudo ln -sf /etc/nginx/sites-available/cloudsine_backend /etc/nginx/sites-enabled/
+            sudo nginx -t && sudo systemctl reload nginx
           EOF
