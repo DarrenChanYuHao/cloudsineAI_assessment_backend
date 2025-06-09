@@ -31,7 +31,7 @@ jobs:
             sudo docker build -t cloudsine_backend .
 
             echo "Running Docker container..."
-            sudo docker run -d -p 8000:8000 --name cloudsine_backend cloudsine_backend
+            sudo docker run -d --name cloudsine_backend cloudsine_backend
           
             echo "Confgure Nginx..."
             sudo cp /home/ubuntu/cloudsineAI_assessment_backend/nginx/fastapi.conf /etc/nginx/sites-available/cloudsine_backend
