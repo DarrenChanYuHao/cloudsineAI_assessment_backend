@@ -20,6 +20,7 @@ ALLOWED_FILE_TYPES = {
     "image/png",
     "application/pdf",
     "text/plain",
+    "text/javascript",
     "application/zip",
     "application/x-rar-compressed",
     "application/javascript",
