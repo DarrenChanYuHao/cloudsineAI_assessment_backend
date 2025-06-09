@@ -23,12 +23,12 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd /home/ubuntu/cloudsineAI_assessment_backend
             echo "Stopping existing container (if any)..."
-            docker stop cloudsine_backend || true
-            docker rm cloudsine_backend || true
+            sudo docker stop cloudsine_backend || true
+            sudo docker rm cloudsine_backend || true
 
             echo "Building Docker image..."
-            docker build -t cloudsine_backend .
+            sudo docker build -t cloudsine_backend .
 
             echo "Running Docker container..."
-            docker run -d -p 8000:8000 --name cloudsine_backend cloudsine_backend
+            sudo docker run -d -p 8000:8000 --name cloudsine_backend cloudsine_backend
           EOF
