@@ -21,7 +21,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd /cloudsineAI_assessment_backend
+            cd /home/ubuntu/cloudsineAI_assessment_backend
             echo "Stopping existing container (if any)..."
             docker stop cloudsine_backend || true
             docker rm cloudsine_backend || true
