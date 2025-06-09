@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import UploadFile, File, HTTPException
 import requests
-import magic
+import puremagic
 
 from routes.scan.DTO.ScannedAnalysisDTO import ScannedAnalysisDTO, HashedFileName
 from routes.scan.DTO.ScannedFileDTO import ScannedFileDTO
@@ -53,7 +53,9 @@ def validate_file(file: UploadFile):
                                 ALLOWED_FILE_TYPES))
 
     # Use python-magic to verify the file type
-    detected_file_type = magic.from_buffer(file.file.read(1024), mime=True)
+    puremagic_response = puremagic.magic_string(file.file.read())
+    detected_file_type = puremagic_response[0].mime_type if puremagic_response else None
+    print(detected_file_type)
     file.file.seek(0)
 
     if detected_file_type not in ALLOWED_FILE_TYPES:
