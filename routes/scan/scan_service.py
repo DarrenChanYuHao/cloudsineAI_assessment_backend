@@ -53,16 +53,16 @@ def validate_file(file: UploadFile):
                             detail=f"File content type is {file.content_type}. Allowed types are: " + ", ".join(
                                 ALLOWED_FILE_TYPES))
 
-    # Use python-magic to verify the file type
-    puremagic_response = puremagic.magic_string(file.file.read())
-    detected_file_type = puremagic_response[0].mime_type if puremagic_response else None
-    print(detected_file_type)
-    file.file.seek(0)
-
-    if detected_file_type not in ALLOWED_FILE_TYPES:
-        raise HTTPException(status_code=400,
-                            detail=f"File content type is {file.content_type}. Allowed types are: " + ", ".join(
-                                ALLOWED_FILE_TYPES))
+    # # Use python-magic to verify the file type
+    # puremagic_response = puremagic.magic_string(file.file.read())
+    # detected_file_type = puremagic_response[0].mime_type if puremagic_response else "None"
+    # print(detected_file_type)
+    # file.file.seek(0)
+    #
+    # if detected_file_type not in ALLOWED_FILE_TYPES:
+    #     raise HTTPException(status_code=400,
+    #                         detail=f"File content type is {file.content_type}. Allowed types are: " + ", ".join(
+    #                             ALLOWED_FILE_TYPES))
 
 def upload_to_virustotal(file: UploadFile) -> ScannedFileDTO:
     """

@@ -56,6 +56,7 @@ def summarize_result(report: ScannedAnalysisDTO) -> dict:
 
     3. 🛡 **What This Means** (Layman's terms):
        - Explain whether the user should feel safe opening this file.
+       - If not safe, explain the virus or malware type in simple terms. Limit to one sentence.
        - If not safe, give one simple action (e.g., “This file contains virus. Do not open this file and delete it.”)
 
     4. 🧾 **File Metadata**:
