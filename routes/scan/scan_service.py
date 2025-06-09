@@ -132,22 +132,32 @@ def analyze_file(file_id: str) -> ScannedAnalysisDTO:
         "x-apikey": virustotal_api_key
     }
 
-    response = requests.get(url=VT_ANALYSIS_URL, headers=headers)
+    analysis_response = requests.get(url=VT_ANALYSIS_URL, headers=headers)
 
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code,
+    if analysis_response.status_code != 200:
+        raise HTTPException(status_code=analysis_response.status_code,
                             detail="Failed to retrieve file analysis from VirusTotal. Please try again later.")
 
+    VT_FILE_URL = f"{VT_API_BASE_URL}/files/{analysis_response.json()['meta']['file_info']['sha256']}"
+
+    file_response = requests.get(url=VT_FILE_URL, headers=headers)
+    if file_response.status_code != 200:
+        raise HTTPException(status_code=file_response.status_code,
+                            detail="Failed to retrieve file metadata from VirusTotal. Please try again later.")
+
     scanned_analysis = ScannedAnalysisDTO(
+        meaningful_name=file_response.json()['data']['attributes']['meaningful_name'],
+        type_extension=file_response.json()['data']['attributes']['type_extension'],
+        size=file_response.json()['data']['attributes']['size'],
+        last_analysis_date= file_response.json()['data']['attributes']['last_analysis_date'],
         virus_total_id=file_id,
-        scan_status=response.json()['data']['attributes']['status'],
-        results=response.json()['data']['attributes']['results'],
-        stats=response.json()['data']['attributes']['stats'],
-        scan_date=response.json()['data']['attributes']['date'],
+        scan_status=analysis_response.json()['data']['attributes']['status'],
+        results=analysis_response.json()['data']['attributes']['results'],
+        stats=analysis_response.json()['data']['attributes']['stats'],
         metadata= HashedFileName(
-            sha256=response.json()['meta']['file_info']['sha256'],
-            md5=response.json()['meta']['file_info']['md5'],
-            sha1=response.json()['meta']['file_info']['sha1']
+            sha256=analysis_response.json()['meta']['file_info']['sha256'],
+            md5=analysis_response.json()['meta']['file_info']['md5'],
+            sha1=analysis_response.json()['meta']['file_info']['sha1']
         )
     )
 
