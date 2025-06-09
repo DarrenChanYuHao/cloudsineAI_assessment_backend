@@ -22,6 +22,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd /home/ubuntu/cloudsineAI_assessment_backend
+            git pull origin
             echo "Stopping existing container (if any)..."
             sudo docker stop cloudsine_backend || true
             sudo docker rm cloudsine_backend || true
