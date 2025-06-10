@@ -145,19 +145,25 @@ def analyze_file(file_id: str) -> ScannedAnalysisDTO:
         raise HTTPException(status_code=file_response.status_code,
                             detail="Failed to retrieve file metadata from VirusTotal. Please try again later.")
 
+    print(file_response.json())
+
+    attributes = file_response.json().get('data', {}).get('attributes', {})
+    analysis_attributes = analysis_response.json().get('data', {}).get('attributes', {})
+    meta_info = analysis_response.json().get('meta', {}).get('file_info', {})
+
     scanned_analysis = ScannedAnalysisDTO(
-        meaningful_name=file_response.json()['data']['attributes']['meaningful_name'],
-        type_extension=file_response.json()['data']['attributes']['type_extension'],
-        size=file_response.json()['data']['attributes']['size'],
-        last_analysis_date= file_response.json()['data']['attributes']['last_analysis_date'],
+        meaningful_name=attributes.get('meaningful_name') or "Pending",
+        type_extension=attributes.get('type_extension') or "Pending",
+        size=attributes.get('size') or 0,
+        last_analysis_date=attributes.get('last_analysis_date') or 0,
         virus_total_id=file_id,
-        scan_status=analysis_response.json()['data']['attributes']['status'],
-        results=analysis_response.json()['data']['attributes']['results'],
-        stats=analysis_response.json()['data']['attributes']['stats'],
-        metadata= HashedFileName(
-            sha256=analysis_response.json()['meta']['file_info']['sha256'],
-            md5=analysis_response.json()['meta']['file_info']['md5'],
-            sha1=analysis_response.json()['meta']['file_info']['sha1']
+        scan_status=analysis_attributes.get('status'),
+        results=analysis_attributes.get('results'),
+        stats=analysis_attributes.get('stats'),
+        metadata=HashedFileName(
+            sha256=meta_info.get('sha256'),
+            md5=meta_info.get('md5'),
+            sha1=meta_info.get('sha1')
         )
     )
 

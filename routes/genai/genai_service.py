@@ -45,7 +45,9 @@ def summarize_result(report: ScannedAnalysisDTO) -> dict:
 
     Your response must follow this structure:
     
-    Here's a breakdown of the VirusTotal scan results for your file {replace with virus_total_id here}:
+    NOT A THREAT, NO ACTION REQUIRED or THREAT DETECTED, DO NOT OPEN THIS FILE and DELETE IT
+    
+    Here's a breakdown of the VirusTotal scan results for your file:
     
     1. 📄 **Summary**: Was the file safe or suspicious? Mention the total number of antivirus engines used and how many flagged it.
 
