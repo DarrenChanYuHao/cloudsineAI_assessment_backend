@@ -131,4 +131,4 @@ def get_system_prompt(prompt_type: str) -> str:
     elif prompt_type == "singaporean_singlish":
         return singaporean_singlish_system_prompt
     else:
-        raise ValueError("Invalid prompt type. Use 'base' or 'cybersecurity_professional'.")
+        raise ValueError("Invalid prompt type. Use 'base' or 'cybersecurity_professional' or 'singaporean_singlish'.")
