@@ -119,53 +119,84 @@ def scan_file(file: UploadFile = File(...)) -> ScannedFileDTO:
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while scanning the file. Please try again later.")
 
-def analyze_file(file_id: str) -> ScannedAnalysisDTO:
-    """
-    Return analysis of a file for viruses and malware.
-    :param file_id: str: The VirusTotal ID of the scanned file.
-    :return: ScannedAnalysisDTO: The scanned analysis details DTO.
-    """
 
-    #
+def analyze_file(file_id: str, is_hash: bool) -> ScannedAnalysisDTO:
+    """
+    Returns analysis of a file from VirusTotal for viruses and malware.
 
-    VT_ANALYSIS_URL = f"{VT_API_BASE_URL}/analyses/{file_id}"
+    :param file_id: The VirusTotal file ID or hash.
+    :param is_hash: Indicates if the file_id is a hash or an analysis ID.
+    :return: ScannedAnalysisDTO containing scan details.
+    """
     headers = {
         "accept": "application/json",
         "x-apikey": virustotal_api_key
     }
 
-    analysis_response = requests.get(url=VT_ANALYSIS_URL, headers=headers)
+    # If it's not a hash, get analysis details first
+    if not is_hash:
+        analysis_url = f"{VT_API_BASE_URL}/analyses/{file_id}"
+        analysis_response = requests.get(analysis_url, headers=headers)
 
-    if analysis_response.status_code != 200:
-        raise HTTPException(status_code=analysis_response.status_code,
-                            detail="Failed to retrieve file analysis from VirusTotal. Please try again later.")
+        if analysis_response.status_code != 200:
+            raise HTTPException(
+                status_code=analysis_response.status_code,
+                detail="Failed to retrieve file analysis from VirusTotal. Please try again later."
+            )
 
-    VT_FILE_URL = f"{VT_API_BASE_URL}/files/{analysis_response.json()['meta']['file_info']['sha256']}"
+        analysis_json = analysis_response.json()
+        analysis_attributes = analysis_json.get("data", {}).get("attributes", {})
+        meta_info = analysis_json.get("meta", {}).get("file_info", {})
+        status = analysis_attributes.get("status", "pending")
 
-    file_response = requests.get(url=VT_FILE_URL, headers=headers)
+        # Extract SHA256 from metadata
+        sha256 = meta_info.get("sha256")
+        file_url = f"{VT_API_BASE_URL}/files/{sha256}"
+
+    else:
+        file_url = f"{VT_API_BASE_URL}/files/{file_id}"
+        status = "completed"  # Assume completed for direct hash lookups
+
+    # Get file metadata
+    file_response = requests.get(file_url, headers=headers)
     if file_response.status_code != 200:
-        raise HTTPException(status_code=file_response.status_code,
-                            detail="Failed to retrieve file metadata from VirusTotal. Please try again later.")
+        raise HTTPException(
+            status_code=file_response.status_code,
+            detail="Failed to retrieve file metadata from VirusTotal. Please try again later."
+        )
 
-    print(file_response.json())
+    file_json = file_response.json()
+    file_data = file_json.get("data", {})
+    file_attrs = file_data.get("attributes", {})
 
-    file_attribute = file_response.json().get('data', {}).get('attributes', {})
-    analysis_attributes = analysis_response.json().get('data', {}).get('attributes', {})
-    meta_info = analysis_response.json().get('meta', {}).get('file_info', {})
+    # Step 3: Compose results
+    if not is_hash:
+        meta_info = analysis_attributes.get("meta", {}).get("file_info", {})
+    else:
+        sha256 = file_id
+        md5 = file_attrs.get("md5")
+        sha1 = file_attrs.get("sha1")
+        meta_info = {
+            "sha256": sha256,
+            "md5": md5,
+            "sha1": sha1
+        }
+
+    virus_total_id = "N.A." if is_hash else file_id
 
     scanned_analysis = ScannedAnalysisDTO(
-        meaningful_name=file_attribute.get('meaningful_name') or "Pending",
-        type_extension=file_attribute.get('type_extension') or "Pending",
-        size=file_attribute.get('size') or 0,
-        last_analysis_date=file_attribute.get('last_analysis_date') * 1000 or 0,
-        virus_total_id=file_id,
-        scan_status=analysis_attributes.get('status'),
-        results=analysis_attributes.get('results') or file_attribute.get('last_analysis_results'),
-        stats=analysis_attributes.get('stats') or file_attribute.get('last_analysis_stats'),
+        meaningful_name=file_attrs.get("meaningful_name", "Pending"),
+        type_extension=file_attrs.get("type_extension", "Pending"),
+        size=file_attrs.get("size", 0),
+        last_analysis_date=(file_attrs.get("last_analysis_date", 0) * 1000),
+        virus_total_id=virus_total_id,
+        scan_status=status,
+        results=analysis_attributes.get("results") if not is_hash else file_attrs.get("last_analysis_results"),
+        stats=analysis_attributes.get("stats") if not is_hash else file_attrs.get("last_analysis_stats"),
         metadata=HashedFileName(
-            sha256=meta_info.get('sha256'),
-            md5=meta_info.get('md5'),
-            sha1=meta_info.get('sha1')
+            sha256=meta_info.get("sha256", file_id),
+            md5=meta_info.get("md5", file_attrs.get("md5")),
+            sha1=meta_info.get("sha1", file_attrs.get("sha1"))
         )
     )
 
