@@ -64,7 +64,11 @@ cybersecurity_professional_system_prompt = '''
     Technical Analysis:
        - Explain the scan results in detail, including the types of malware detected.
        - Provide insights into the behavior of the file and any specific threats identified.
+       
+    Mitigation Steps:
        - Provide steps to mitigate the threat if applicable.
+       
+    Remediation:
        - If already infected, provide remediation steps.
 
     File Metadata:
