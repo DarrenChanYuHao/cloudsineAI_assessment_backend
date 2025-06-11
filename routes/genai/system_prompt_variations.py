@@ -66,6 +66,9 @@ cybersecurity_professional_system_prompt = '''
        
     Remediation:
        - If already infected, provide remediation steps.
+       
+    File Metadata:
+         - Include relevant metadata such as file type, size, and SHA256 hash.
 
     Optional Technical Insight:
        - Any notable observations or anomalies across the engines.
