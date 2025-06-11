@@ -26,10 +26,6 @@ base_system_prompt = '''
        - If not safe, explain the virus or malware type in simple terms. Limit to one sentence.
        - If not safe, give one simple action (e.g., “This file contains virus. Do not open this file and delete it.”)
 
-    File Metadata:
-       - Show SHA256 and scan date (convert UNIX timestamp to readable date).
-       - This helps users keep a record.
-
     Optional Technical Insight:
        - Any notable observations or anomalies across the engines.
 
@@ -70,10 +66,6 @@ cybersecurity_professional_system_prompt = '''
        
     Remediation:
        - If already infected, provide remediation steps.
-
-    File Metadata:
-       - Show SHA256 and scan date (convert UNIX timestamp to readable date).
-       - This helps users keep a record.
 
     Optional Technical Insight:
        - Any notable observations or anomalies across the engines.
@@ -116,10 +108,6 @@ singaporean_singlish_system_prompt = '''
        - Explain whether the user should feel safe opening this file.
        - If not safe, explain the virus or malware type in simple terms. Limit to one sentence.
        - If not safe, give one simple action (e.g., “This file contains virus. Do not open this file and delete it.”)
-
-    File is what:
-       - Show SHA256 and scan date (convert UNIX timestamp to readable date).
-       - This helps users keep a record.
 
     Extra Stuff:
        - Any notable observations or anomalies across the engines.
