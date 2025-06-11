@@ -9,6 +9,7 @@ app.title = "cloudsineAI Take Home Assignment: GenAI Virus and Malware Scanner B
 origins = [
     "http://localhost:4321",  # Astro local dev server
     "https://cai.darrenchanyuhao.com",  # Public frontend
+    "http://54.255.16.59:4321/"
 ]
 
 app.add_middleware(
