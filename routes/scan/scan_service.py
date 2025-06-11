@@ -147,19 +147,19 @@ def analyze_file(file_id: str) -> ScannedAnalysisDTO:
 
     print(file_response.json())
 
-    attributes = file_response.json().get('data', {}).get('attributes', {})
+    file_attribute = file_response.json().get('data', {}).get('attributes', {})
     analysis_attributes = analysis_response.json().get('data', {}).get('attributes', {})
     meta_info = analysis_response.json().get('meta', {}).get('file_info', {})
 
     scanned_analysis = ScannedAnalysisDTO(
-        meaningful_name=attributes.get('meaningful_name') or "Pending",
-        type_extension=attributes.get('type_extension') or "Pending",
-        size=attributes.get('size') or 0,
-        last_analysis_date=attributes.get('last_analysis_date') * 1000 or 0,
+        meaningful_name=file_attribute.get('meaningful_name') or "Pending",
+        type_extension=file_attribute.get('type_extension') or "Pending",
+        size=file_attribute.get('size') or 0,
+        last_analysis_date=file_attribute.get('last_analysis_date') * 1000 or 0,
         virus_total_id=file_id,
         scan_status=analysis_attributes.get('status'),
-        results=analysis_attributes.get('results'),
-        stats=analysis_attributes.get('stats'),
+        results=analysis_attributes.get('results') or file_attribute.get('last_analysis_results'),
+        stats=analysis_attributes.get('stats') or file_attribute.get('last_analysis_stats'),
         metadata=HashedFileName(
             sha256=meta_info.get('sha256'),
             md5=meta_info.get('md5'),
