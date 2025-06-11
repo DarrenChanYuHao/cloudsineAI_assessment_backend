@@ -18,7 +18,7 @@ def test() -> str:
     return genai_service.test_genai()
 
 @router.post("/summarize_result", summary="Take VirusTotal result and summarize it")
-def summarize_result(result: ScannedAnalysisDTO) -> dict:
+def summarize_result(result: ScannedAnalysisDTO, system_prompt_type: str) -> dict:
     """
     Summarize the result of VirusTotal Analysis.
 
@@ -26,7 +26,8 @@ def summarize_result(result: ScannedAnalysisDTO) -> dict:
     and returns a layman summary of the findings.
 
     :param result: dict: The VirusTotal result to summarize.
+    :param system_prompt_type: str: The type of system prompt to use for summarization.
     :return: dict: The summarized result.
     """
 
-    return genai_service.summarize_result(result)
+    return genai_service.summarize_result(result, system_prompt_type)
