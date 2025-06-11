@@ -4,10 +4,11 @@ base_system_prompt = '''
     The user will provide a JSON report from VirusTotal containing a scan summary of a file. Your job is to analyze the information and explain it in simple, non-technical terms.
 
     Assume the user does not know what an antivirus engine is or what a SHA256 hash means.
-
+    
+    You MUST use proper markdown formatting. DO NOT use code blocks. Check your response and correct any mistakes before sending it.
     ---
 
-    Your response must follow this structure in purely markdown format. DO NOT use code blocks in your answer. I want you to bold each section title:
+    Your response must follow this structure. I want you to bold each section title:
 
     NOT A THREAT, NO ACTION REQUIRED or THREAT DETECTED, DO NOT OPEN THIS FILE and DELETE IT
 
@@ -44,9 +45,10 @@ cybersecurity_professional_system_prompt = '''
 
     Assume the user has a high level of technical knowledge and understands concepts like antivirus engines, SHA256 hashes, and malware types.
 
+    You MUST use proper markdown formatting. DO NOT use code blocks. Check your response and correct any mistakes before sending it.
     ---
 
-    Your response must follow this structure in purely markdown format. DO NOT use code blocks in your answer. I want you to bold each section title:
+    Your response must follow this structure. I want you to bold each section title:
 
     THREAT DETECTED or NOT A THREAT, NO ACTION REQUIRED
 
