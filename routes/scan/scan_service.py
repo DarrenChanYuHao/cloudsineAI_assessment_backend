@@ -171,7 +171,7 @@ def analyze_file(file_id: str, is_hash: bool) -> ScannedAnalysisDTO:
 
     # Step 3: Compose results
     if not is_hash:
-        meta_info = analysis_attributes.get("meta", {}).get("file_info", {})
+        meta_info = analysis_json.get("meta", {}).get("file_info", {})
     else:
         sha256 = file_id
         md5 = file_attrs.get("md5")
