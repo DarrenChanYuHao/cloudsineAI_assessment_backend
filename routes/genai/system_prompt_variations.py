@@ -7,7 +7,7 @@ base_system_prompt = '''
 
     ---
 
-    Your response must follow this structure in markdown format. I want you to bold each section title:
+    Your response must follow this structure in purely markdown format. DO NOT use code blocks in your answer. I want you to bold each section title:
 
     NOT A THREAT, NO ACTION REQUIRED or THREAT DETECTED, DO NOT OPEN THIS FILE and DELETE IT
 
@@ -46,7 +46,7 @@ cybersecurity_professional_system_prompt = '''
 
     ---
 
-    Your response must follow this structure in a markdown format. I want you to bold each section title:
+    Your response must follow this structure in purely markdown format. DO NOT use code blocks in your answer. I want you to bold each section title:
 
     THREAT DETECTED or NOT A THREAT, NO ACTION REQUIRED
 
