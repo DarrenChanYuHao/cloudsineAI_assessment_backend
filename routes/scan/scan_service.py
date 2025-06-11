@@ -47,22 +47,11 @@ def validate_file(file: UploadFile):
     if file.size > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail=f"File size is too big. Maximum size is {MAX_FILE_SIZE_MB} MB.")
 
-    # Check if the file type is valid using both file.content_type and python-magic
+    # Check if the file type is valid using file.content_type (Would have been better if I could use magic numbers)
     if file.content_type not in ALLOWED_FILE_TYPES:
         raise HTTPException(status_code=400,
                             detail=f"File content type is {file.content_type}. Allowed types are: " + ", ".join(
                                 ALLOWED_FILE_TYPES))
-
-    # # Use python-magic to verify the file type
-    # puremagic_response = puremagic.magic_string(file.file.read())
-    # detected_file_type = puremagic_response[0].mime_type if puremagic_response else "None"
-    # print(detected_file_type)
-    # file.file.seek(0)
-    #
-    # if detected_file_type not in ALLOWED_FILE_TYPES:
-    #     raise HTTPException(status_code=400,
-    #                         detail=f"File content type is {file.content_type}. Allowed types are: " + ", ".join(
-    #                             ALLOWED_FILE_TYPES))
 
 def upload_to_virustotal(file: UploadFile) -> ScannedFileDTO:
     """
