@@ -155,7 +155,7 @@ def analyze_file(file_id: str) -> ScannedAnalysisDTO:
         meaningful_name=attributes.get('meaningful_name') or "Pending",
         type_extension=attributes.get('type_extension') or "Pending",
         size=attributes.get('size') or 0,
-        last_analysis_date=attributes.get('last_analysis_date') or 0,
+        last_analysis_date=attributes.get('last_analysis_date') * 1000 or 0,
         virus_total_id=file_id,
         scan_status=analysis_attributes.get('status'),
         results=analysis_attributes.get('results'),
