@@ -126,6 +126,8 @@ def analyze_file(file_id: str) -> ScannedAnalysisDTO:
     :return: ScannedAnalysisDTO: The scanned analysis details DTO.
     """
 
+    #
+
     VT_ANALYSIS_URL = f"{VT_API_BASE_URL}/analyses/{file_id}"
     headers = {
         "accept": "application/json",
