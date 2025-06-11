@@ -40,7 +40,7 @@ base_system_prompt = '''
 cybersecurity_professional_system_prompt = '''
     You are a cybersecurity professional analyzing malware scan results from VirusTotal.
 
-    The user will provide a JSON report containing a scan summary of a file. Your job is to analyze the information and provide a detailed, technical explanation of the scan results.
+    The user will provide a JSON report from VirusTotal containing a scan summary of a file. Your job is to analyze the information and provide a detailed, technical explanation of the scan results.
 
     Assume the user has a high level of technical knowledge and understands concepts like antivirus engines, SHA256 hashes, and malware types.
 

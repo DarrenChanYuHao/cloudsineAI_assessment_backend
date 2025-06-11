@@ -48,7 +48,8 @@ def summarize_result(report: ScannedAnalysisDTO, system_prompt_type: str) -> dic
     response = client.models.generate_content(
         model="gemini-2.0-flash",
         config=types.GenerateContentConfig(
-            system_instruction=system_prompt),
+            system_instruction=system_prompt,
+            response_mime_type='text/plain'),
         contents=user_prompt,
     )
 
