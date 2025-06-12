@@ -158,7 +158,7 @@ def analyze_file(file_id: str, is_hash: bool) -> ScannedAnalysisDTO:
     file_data = file_json.get("data", {})
     file_attrs = file_data.get("attributes", {})
 
-    # Step 3: Compose results
+    # Get hash metadata
     if not is_hash:
         meta_info = analysis_json.get("meta", {}).get("file_info", {})
     else:
@@ -173,6 +173,21 @@ def analyze_file(file_id: str, is_hash: bool) -> ScannedAnalysisDTO:
 
     virus_total_id = "N.A." if is_hash else file_id
 
+    # Get results
+    if not is_hash:
+        if status == "completed":
+            results = analysis_attributes.get("results", {})
+            stats = analysis_attributes.get("stats", {})
+        elif file_attrs.get("last_analysis_results"):
+            results = file_attrs.get("last_analysis_results", {})
+            stats = file_attrs.get("last_analysis_stats", {})
+        else:
+            results = {}
+            stats = {}
+    else:
+        results = file_attrs.get("last_analysis_results", {})
+        stats = file_attrs.get("last_analysis_stats", {})
+
     scanned_analysis = ScannedAnalysisDTO(
         meaningful_name=file_attrs.get("meaningful_name", "Pending"),
         type_extension=file_attrs.get("type_extension", "Pending"),
@@ -180,8 +195,8 @@ def analyze_file(file_id: str, is_hash: bool) -> ScannedAnalysisDTO:
         last_analysis_date=(file_attrs.get("last_analysis_date", 0) * 1000),
         virus_total_id=virus_total_id,
         scan_status=status,
-        results=analysis_attributes.get("results") if not is_hash else file_attrs.get("last_analysis_results"),
-        stats=analysis_attributes.get("stats") if not is_hash else file_attrs.get("last_analysis_stats"),
+        results=results,
+        stats=stats,
         metadata=HashedFileName(
             sha256=meta_info.get("sha256", file_id),
             md5=meta_info.get("md5", file_attrs.get("md5")),
