@@ -6,6 +6,8 @@ It is written in Python using FastAPI and provides routes to scan files, handle 
 
 It is currently deployed on: https://caibackend.darrenchanyuhao.com
 
+The API reference can be found at: https://caibackend.darrenchanyuhao.com/docs
+
 ## Getting Started
 
 ### Prerequisites
