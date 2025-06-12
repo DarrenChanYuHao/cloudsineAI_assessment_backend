@@ -89,4 +89,6 @@ You can then set up the SSL certificate. You can do this by:
 2. I used Certbot and Let's Encrypt for the SSL certificate.
 3. Once that is done, it should automatically update the Nginx conf. file, if not, you can manually upadte it back.
 
+P.S.S Note that CORS is enabled and thus you will need to amend the origins allowed in the main.py file.
+
 Thank you!
