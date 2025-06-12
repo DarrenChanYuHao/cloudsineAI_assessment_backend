@@ -82,7 +82,7 @@ P.S For first deployment, it may fail due to missing SSL certificates. Remove th
 You can then set up the SSL certificate. You can do this by:
 
 1. Setting up a domain name and pointing it to the EC2 instance public IP.
-2. I used Certbot and Let's Encrpyt for the SSL certificate.
+2. I used Certbot and Let's Encrypt for the SSL certificate.
 3. Once that is done, it should automatically update the Nginx conf. file, if not, you can manually upadte it back.
 
 Thank you!
