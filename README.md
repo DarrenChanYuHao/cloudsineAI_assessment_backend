@@ -4,6 +4,8 @@ This repository contains the backend code for the GenAI Virus and Malware Scanne
 
 It is written in Python using FastAPI and provides routes to scan files, handle the uploads and also GenAI analysis capabilities.
 
+It is currently deployed on: https://caibackend.darrenchanyuhao.com
+
 ## Getting Started
 
 ### Prerequisites
